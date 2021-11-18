@@ -12,7 +12,6 @@ public class Frame extends JFrame {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private final Canvas canvas;
 	private final BufferStrategy bufferStrategy;
 
 	private Polynomial polynomial;
@@ -31,7 +30,7 @@ public class Frame extends JFrame {
 
 		JPanel panel = (JPanel) getContentPane();
 
-		canvas = new Canvas();
+		Canvas canvas = new Canvas();
 		panel.add(canvas);
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -57,18 +56,20 @@ public class Frame extends JFrame {
 			while(true) {
 				Graphics2D graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
 
+				double fy = 5.0;
+				double fx = 5.0 * getWidth() / getHeight();
 
-				for(int x = 0; x < 400; x++) {
-					double px = (x / 200.0 - 1) * 10.0;
-					for(int y = 0; y < 400; y++) {
-						double py = (y / 200.0 - 1) * 10.0;
+				for(int x = 0; x < getWidth(); x++) {
+					double px = (x / (getWidth() / 2.0) - 1) * fx;
+					for(int y = 0; y < getHeight(); y++) {
+						double py = (y / (getHeight() / 2.0) - 1) * fy;
 
 						double value = 0.0;
 						if(polynomial != null) {
 							value = polynomial.getValue(px, py);
 						}
 
-						Color color = null;
+						Color color;
 						if(gradient != null) {
 							color = gradient.getColor(value);
 						} else {

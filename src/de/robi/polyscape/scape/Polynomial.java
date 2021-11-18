@@ -47,10 +47,10 @@ public class Polynomial {
 
 	@Override
 	public String toString() {
-		String s = "";
+		StringBuilder s = new StringBuilder();
 
 		for(Integer[] exponent : coefficients.keySet()) {
-			s += "[" + exponent[0] + ", " + exponent[1] + ", " + coefficients.get(exponent) + "],";
+			s.append("[").append(exponent[0]).append(", ").append(exponent[1]).append(", ").append(coefficients.get(exponent)).append("],");
 		}
 
 		return s.substring(0, s.length()-1);

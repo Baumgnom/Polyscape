@@ -33,8 +33,8 @@ public class Matrix {
 		for(int i = 0; i < content[0].length - 1 && i < content.length; i++) {
 			int m = -1, n = -1;
 
-			for(int pm = i; pm < content.length; pm++) {
-				for(int pn = i; pn < content[0].length; pn++) {
+			for(int pn = i; pn < content[0].length; pn++) {
+				for(int pm = i; pm < content.length; pm++) {
 					if(content[pm][pn] != 0) {
 						m = pm;
 						n = pn;
@@ -49,14 +49,19 @@ public class Matrix {
 			}
 
 			if(m != i) {
-				swap(m, 0);
+				swap(m, i);
+				m = i;
 			}
 
+
 			multiply(m, 1 / content[m][n]);
+
+			content[m][n] = 1; // avoid rounding errors
 
 			for(int row = 0; row < content.length; row++) {
 				if(row != m) {
 					add(m, row, -content[row][n]);
+					content[row][n] = 0; // avoid rounding errors
 				}
 			}
 		}
@@ -70,13 +75,17 @@ public class Matrix {
 
 	private void multiply(int m, double mod) {
 		for(int n = 0; n < content[m].length; n++) {
-			content[m][n] = content[m][n] * mod;
+			double val = content[m][n] * mod;
+			if(val == -0) val = 0;
+			content[m][n] = val;
 		}
 	}
 
 	private void add(int m1, int m2, double mod) {
 		for(int n = 0; n < content[m1].length; n++) {
-			content[m2][n] = content[m2][n] + content[m1][n] * mod;
+			double val = content[m2][n] + content[m1][n] * mod;
+			if(val == -0) val = 0;
+			content[m2][n] = val;
 		}
 	}
 
@@ -85,7 +94,41 @@ public class Matrix {
 
 		int vars = Math.min(content.length, content[0].length - 1);
 
-		for(int i = 0, grade = 0; i < vars; grade++) {
+		int[][] exponents = new int[getWidth()][2];
+		int grade = 0;
+		int y = 0;
+		for(int i = 0; i < getWidth(); i++) {
+			int x = grade - y;
+			exponents[i][0] = x;
+			exponents[i][1] = y;
+
+			if(y == grade) {
+				y = 0;
+				grade++;
+			} else {
+				y++;
+			}
+		}
+
+
+
+		int i = 0, j = 0;
+		while(i < getHeight() && j < getWidth()) {
+			if(content[i][j] != 1) {
+				j++;
+				continue;
+			}
+			double value = 0;
+			if(i < vars) {
+				value = content[i][getWidth() - 1];
+			}
+
+			polynomial.setCoefficient(exponents[j][0], exponents[j][1], value);
+			i++;
+			j++;
+		}
+
+		/*for(int i = 0, grade = 0; i < vars; grade++) {
 			for(int y = 0; y <= grade; y++) {
 				int x = grade - y;
 
@@ -98,7 +141,7 @@ public class Matrix {
 
 				i++;
 			}
-		}
+		}*/
 
 		return polynomial;
 	}

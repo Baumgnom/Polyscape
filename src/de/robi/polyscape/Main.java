@@ -7,6 +7,7 @@ import de.robi.polyscape.scape.Matrix;
 import de.robi.polyscape.scape.Polynomial;
 
 import java.awt.*;
+import java.util.Map;
 import java.util.Random;
 
 public class Main {
@@ -14,19 +15,7 @@ public class Main {
 	public static void main(String[] args) {
 
 
-		/*Constraint constraint = new Constraint();
-		constraint.addConstraint(1, 0, 1);
-		constraint.addConstraint(0.8, 0.2, 1);
-		constraint.addConstraint(0.5, 0.5, 1);
-		constraint.addConstraint(0.3, 0.9, 1);
-		constraint.addConstraint(0.5, 1.2, 1);
-		constraint.addConstraint(1, 1, 2);
-		constraint.addConstraint(0, 0, 0.7);
-		constraint.addConstraint(1, -1, 0.8);
-		constraint.addConstraint(1, -1, 0.8);
-		constraint.addConstraint(-1, -1, 0.6);
-
-		Matrix matrix = constraint.createMatrix(3);*/
+		/**/
 
 		Random random = new Random();
 
@@ -46,27 +35,37 @@ public class Main {
 		frame.setGradient(gradient);
 
 		while(true) {
-			Matrix matrix = new Matrix(21, 22);
+			Constraint constraint = new Constraint();
 
-			for(int i = 0; i < matrix.getHeight(); i++) {
-				for(int j = 0; j < matrix.getWidth(); j++) {
-					matrix.set(i, j, random.nextInt(200) - 100);
+
+			for(int i = 0; i < 3; i++) {
+				for(int j = 0; j < 3; j++) {
+					constraint.addConstraint(i, j, random.nextInt(5));
 				}
 			}
 
+			Matrix matrix = constraint.createMatrix(5);
+			System.out.println(matrix);
 			matrix.solve();
-
 
 			Polynomial polynomial = matrix.createPolynomial();
 
+			Map<Double[], Double> map = constraint.getConstraints();
+			for(Double[] pos : map.keySet()) {
+				System.out.println("Expected at[" + pos[0] + "," + pos[1] + "]: \t" + map.get(pos) + "\t - polynom: " + polynomial.getValue(pos[0], pos[1]));
+			}
+
+
 			frame.setPolynomial(polynomial);
 
+			System.out.println(matrix);
+			System.out.println(polynomial);
+
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-
 	}
 }

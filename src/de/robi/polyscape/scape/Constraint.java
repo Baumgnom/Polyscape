@@ -14,6 +14,10 @@ public class Constraint {
 		constraints.put(new Double[] {x, y}, value);
 	}
 
+	public Map<Double[], Double> getConstraints() {
+		return new HashMap<>(constraints);
+	}
+
 	public Matrix createMatrix(int grade) {
 		if(grade < 0) return null;
 
@@ -22,8 +26,8 @@ public class Constraint {
 		int[][] exponents = new int[size][2];
 		int index = 0;
 		for(int i = 0; i <= grade; i++) {
-			for(int x = 0; x <= i; x++) {
-				int y = i - x;
+			for(int y = 0; y <= i; y++) {
+				int x = i - y;
 				exponents[index][0] = x;
 				exponents[index][1] = y;
 				index++;

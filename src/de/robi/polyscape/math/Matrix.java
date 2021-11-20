@@ -1,13 +1,27 @@
 package de.robi.polyscape.math;
 
-import de.robi.polyscape.math.Fraction;
 import de.robi.polyscape.scape.Polynomial;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Matrix {
 	private final Fraction[][] content;
 
 	public Matrix(int m, int n) {
 		content = new Fraction[m][n];
+	}
+
+	public Matrix(Matrix copy) {
+		this(copy.getHeight(), copy.getWidth());
+
+		for(int i = 0; i < getHeight(); i++) {
+			for(int j = 0; j < getWidth(); j++) {
+				this.content[i][j] = copy.content[i][j];
+			}
+		}
 	}
 
 	public void set(int i, int j, double value) {
@@ -43,8 +57,6 @@ public class Matrix {
 	public void solve() {
 		for(int i = 0, j = 0; j < getWidth() - 1 && i < getHeight(); i++, j++) {
 			int m = -1, n = -1;
-
-
 
 			for(; j < getWidth(); j++) {
 				for(int pm = i; pm < content.length; pm++) {
@@ -109,6 +121,42 @@ public class Matrix {
 			}
 		}
 		return true;
+	}
+
+	public void test(Matrix check) {
+		List<Integer> free = new ArrayList<>();
+		Map<Integer, Fraction> values = new HashMap<>();
+		for(int i = getHeight() - 1; i >= 0; i--) {
+			int pos = -1;
+			for(int j = 0; j < getWidth() - 1; j++) {
+				if(free.contains(j)) continue;
+				if(content[i][j].value() != 0) {
+					if(pos == -1) {
+						pos = j;
+					} else {
+						if(values.containsKey(j)) {
+							pos = -1;
+							break;
+						} else {
+							free.add(j);
+						}
+					}
+				}
+			}
+			if(pos != -1) {
+				values.put(pos, content[i][getWidth() - 1]);
+			}
+		}
+
+		for(int i = 0; i < getHeight(); i++) {
+			Fraction sum = new Fraction(0, 1);
+			for(int j = 0; j < getWidth() - 1; j++) {
+				if(values.containsKey(j)) {
+					sum = sum.add(check.content[i][j].multiply(values.get(j)));
+				}
+			}
+			System.out.println(sum + " " + check.content[i][getWidth() - 1]);
+		}
 	}
 
 	public Polynomial createPolynomial() {

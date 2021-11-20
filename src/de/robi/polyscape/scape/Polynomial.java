@@ -1,20 +1,21 @@
 package de.robi.polyscape.scape;
 
+import de.robi.polyscape.math.Tuple;
+
 import java.util.*;
 
 public class Polynomial {
-	private final Map<Integer[], Double> coefficients;
+	private final Map<Tuple<Integer>, Double> coefficients;
 
 
 	public Polynomial() {
 		this.coefficients = new HashMap<>();
 	}
-	public Polynomial(Map<Integer[], Double> coefficients) {
+	public Polynomial(Map<Tuple<Integer>, Double> coefficients) {
 		this.coefficients = new HashMap<>();
 
-		for(Integer[] exponent : coefficients.keySet()) {
-			if(exponent.length != 2) continue;
-			if(exponent[0] < 0 || exponent[1] < 0) continue;
+		for(Tuple<Integer> exponent : coefficients.keySet()) {
+			if(exponent.x() < 0 || exponent.y() < 0) continue;
 			double value = coefficients.get(exponent);
 			if(this.coefficients.containsKey(exponent)) {
 				value += this.coefficients.get(exponent);
@@ -25,9 +26,9 @@ public class Polynomial {
 
 	public double getValue(double x, double y) {
 		double value = 0;
-		for(Integer[] exponent : coefficients.keySet()) {
-			int powerX = exponent[0];
-			int powerY = exponent[1];
+		for(Tuple<Integer> exponent : coefficients.keySet()) {
+			int powerX = exponent.x();
+			int powerY = exponent.y();
 			value += Math.pow(x, powerX) * Math.pow(y, powerY) * coefficients.get(exponent);
 		}
 
@@ -37,7 +38,7 @@ public class Polynomial {
 	public void setCoefficient(int powerX, int powerY, double value) {
 		if(powerX < 0 || powerY < 0) return;
 
-		Integer[] exponent = new Integer[] {powerX, powerY};
+		Tuple<Integer> exponent = new Tuple<>(powerX, powerY);
 
 		if(this.coefficients.containsKey(exponent)) {
 			value += this.coefficients.get(exponent);
@@ -49,15 +50,15 @@ public class Polynomial {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 
-		for(Integer[] exponent : coefficients.keySet()) {
-			s.append("[").append(exponent[0]).append(", ").append(exponent[1]).append(", ").append(coefficients.get(exponent)).append("],");
+		for(Tuple<Integer> exponent : coefficients.keySet()) {
+			s.append("[").append(exponent.x()).append(", ").append(exponent.y()).append(", ").append(coefficients.get(exponent)).append("],");
 		}
 
 		return s.substring(0, s.length()-1);
 	}
 
 	public static Polynomial createPolynomial(String function) {
-		Map<Integer[], Double> coefficients = new HashMap<>();
+		Map<Tuple<Integer>, Double> coefficients = new HashMap<>();
 
 		function = function.replaceAll("[+]*-", "+-");
 		String[] parts = function.split("\\s*[+]\\s*");
@@ -81,7 +82,7 @@ public class Polynomial {
 				}
 			}
 
-			Integer[] exponent = new Integer[] {xComp, yComp};
+			Tuple<Integer> exponent = new Tuple<>(xComp, yComp);
 			if(coefficients.containsKey(exponent)) {
 				value += coefficients.get(exponent);
 			}
@@ -89,5 +90,13 @@ public class Polynomial {
 		}
 
 		return new Polynomial(coefficients);
+	}
+
+	public static void main(String[] args) {
+		Polynomial polynomial = new Polynomial();
+
+		polynomial.setCoefficient(1, 1, 1);
+		polynomial.setCoefficient(1, 1, 2);
+		System.out.println(polynomial);
 	}
 }

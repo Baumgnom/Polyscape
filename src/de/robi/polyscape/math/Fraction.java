@@ -1,7 +1,7 @@
 package de.robi.polyscape.math;
 
 public record Fraction(long numerator, long denominator) {
-	private static int accuracy = 10;
+	private static int accuracy = 15;
 
 	public Fraction {
 		int signN = numerator < 0? -1 : 1;
@@ -71,20 +71,35 @@ public record Fraction(long numerator, long denominator) {
 	}
 
 	public Fraction add(Fraction fraction) {
-		return new Fraction(this.numerator * fraction.denominator + this.denominator * fraction.numerator, this.denominator * fraction.denominator);
+		try {
+			return new Fraction(Math.addExact(Math.multiplyExact(this.numerator, fraction.denominator), Math.multiplyExact(this.denominator, fraction.numerator)), Math.multiplyExact(this.denominator, fraction.denominator));
+		} catch (ArithmeticException e) {
+			return Fraction.createFraction(this.value() + fraction.value());
+		}
 	}
 
 	public Fraction multiply(Fraction fraction) {
-		return new Fraction(this.numerator * fraction.numerator, this.denominator * fraction.denominator);
+		try {
+			return new Fraction(Math.multiplyExact(this.numerator, fraction.numerator), Math.multiplyExact(this.denominator, fraction.denominator));
+		} catch (ArithmeticException ignored) {}
+
+		Fraction fractionA = new Fraction(this.numerator, fraction.denominator);
+		Fraction fractionB = new Fraction(fraction.numerator, this.denominator);
+		try {
+			return new Fraction(Math.multiplyExact(fractionA.numerator, fractionB.numerator), Math.multiplyExact(fractionA.denominator, fractionB.denominator));
+		} catch (ArithmeticException e) {
+			return Fraction.createFraction(this.value() * fraction.value());
+		}
 	}
 
-	public Fraction multiply(int scalar) {
-		return new Fraction(this.numerator * scalar, this.denominator);
+	public Fraction multiply(long scalar) {
+		return new Fraction(Math.multiplyExact(this.numerator, scalar), this.denominator);
 	}
 
 	public Fraction invert() {
 		return new Fraction(this.denominator, this.numerator);
 	}
+
 
 
 	@Override
@@ -95,5 +110,18 @@ public record Fraction(long numerator, long denominator) {
 
 	public static void setAccuracy(int accuracy) {
 		Fraction.accuracy = accuracy;
+	}
+
+	public static void main(String[] args) {
+		Fraction f1 = new Fraction(-271121060, 1139119);
+
+		Fraction f2 = new Fraction(-320725, 175013);
+
+		Fraction e = new Fraction(-424419548, 1139119);
+
+		Fraction ex = new Fraction(424419548, 1139119);
+
+		System.out.println(424419548 * 271121060);
+		//System.out.println(f1.value() + " * " + (-e.value()) + " + " + f2.value() + " = " + f2.add(f2.multiply(e.multiply(-1))).value());
 	}
 }

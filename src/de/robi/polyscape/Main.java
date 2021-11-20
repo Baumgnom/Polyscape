@@ -2,6 +2,7 @@ package de.robi.polyscape;
 
 import de.robi.polyscape.frame.Frame;
 import de.robi.polyscape.frame.Gradient;
+import de.robi.polyscape.math.Tuple;
 import de.robi.polyscape.scape.Constraint;
 import de.robi.polyscape.math.Matrix;
 import de.robi.polyscape.scape.Polynomial;
@@ -50,19 +51,19 @@ public class Main {
 		while(true) {
 			Constraint constraint = new Constraint();
 
-
-			for(int i = 0; i < 5; i++) {
-				for(int j = 0; j < 5; j++) {
-					constraint.addConstraint(i, j, random.nextInt(5));
+			for(int x = 0; x < 5; x++) {
+				for(int y = 0; y < 5; y++) {
+					int px = (x - 2) * 3 + random.nextInt(3) - 1;
+					int py = (y - 2) * 3 + random.nextInt(3) - 1;
+					constraint.addConstraint(px, py,  Math.max(random.nextInt(3) + random.nextInt(3), 0));
 				}
 			}
 
 
-			Matrix matrix = null;
-			for(int grade = 10; ; grade++) {
+			Matrix matrix;
+			for(int grade = 5; ; grade++) {
 				matrix = constraint.createMatrix(grade);
 				matrix.solve();
-				System.out.println(matrix);
 
 				if(matrix.valid()) {
 					break;
@@ -71,18 +72,23 @@ public class Main {
 
 			Polynomial polynomial = matrix.createPolynomial();
 
-			Map<Double[], Double> map = constraint.getConstraints();
-			for(Double[] pos : map.keySet()) {
-				System.out.println("Expected at[" + pos[0] + "," + pos[1] + "]: \t" + map.get(pos) + "\t - polynom: " + polynomial.getValue(pos[0], pos[1]));
-			}
+			/*Map<Tuple<Double>, Double> map = constraint.getConstraints();
+			for(Tuple<Double> pos : map.keySet()) {
+				//System.out.println("Expected at[" + pos.x() + "," + pos.y() + "]: \t" + map.get(pos) + "\t - polynomial: " + polynomial.getValue(pos.x(), pos.y()));
+				if(Math.abs(map.get(pos) - polynomial.getValue(pos.x(), pos.y())) > Math.pow(10, -10)) {
+					System.out.println("Expected at[" + pos.x() + "," + pos.y() + "]: \t" + map.get(pos) + "\t - polynomial: " + polynomial.getValue(pos.x(), pos.y()));
+				}
+			}*/
 
+			System.out.println("Created another polynomial!");
 
 			frame.setPolynomial(polynomial);
 
-			System.out.println(matrix);
-			//System.out.println(polynomial);
-
-			return;
+			try {
+				Thread.sleep(1000L);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

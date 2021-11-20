@@ -1,22 +1,23 @@
 package de.robi.polyscape.scape;
 
 import de.robi.polyscape.math.Matrix;
+import de.robi.polyscape.math.Tuple;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Constraint {
-	private final Map<Double[], Double> constraints;
+	private final Map<Tuple<Double>, Double> constraints;
 
 	public Constraint() {
 		this.constraints = new HashMap<>();
 	}
 
 	public void addConstraint(double x, double y, double value) {
-		constraints.put(new Double[] {x, y}, value);
+		constraints.put(new Tuple<>(x, y), value);
 	}
 
-	public Map<Double[], Double> getConstraints() {
+	public Map<Tuple<Double>, Double> getConstraints() {
 		return new HashMap<>(constraints);
 	}
 
@@ -39,10 +40,10 @@ public class Constraint {
 		Matrix matrix = new Matrix(constraints.size(), size + 1);
 
 		int i = 0;
-		for(Double[] position : constraints.keySet()) {
+		for(Tuple<Double> position : constraints.keySet()) {
 			for(int j = 0; j < size; j++) {
 
-				matrix.set(i, j, Math.pow(position[0], exponents[j][0]) * Math.pow(position[1], exponents[j][1]));
+				matrix.set(i, j, Math.pow(position.x(), exponents[j][0]) * Math.pow(position.y(), exponents[j][1]));
 			}
 			matrix.set(i, size, constraints.get(position));
 			i++;

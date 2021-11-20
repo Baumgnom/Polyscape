@@ -1,24 +1,35 @@
-package de.robi.polyscape.scape;
+package de.robi.polyscape.math;
+
+import de.robi.polyscape.math.Fraction;
+import de.robi.polyscape.scape.Polynomial;
 
 public class Matrix {
-	private final double[][] content;
+	private final Fraction[][] content;
 
 	public Matrix(int m, int n) {
-		content = new double[m][n];
+		content = new Fraction[m][n];
 	}
 
 	public void set(int i, int j, double value) {
-		content[i][j] = value;
+		content[i][j] = Fraction.createFraction(value);
 	}
 
 	public void setRow(int i, double[] row) {
+		if(row.length != content[i].length) return;
+
+		for(int j = 0; j < getWidth(); j++) {
+			content[i][j] = Fraction.createFraction(row[i]);
+		}
+	}
+
+	public void setRow(int i, Fraction[] row) {
 		if(row.length != content[i].length) return;
 
 		content[i] = row;
 	}
 
 	public double get(int i, int j) {
-		return content[i][j];
+		return content[i][j].value();
 	}
 
 	public int getHeight() {
@@ -30,14 +41,16 @@ public class Matrix {
 	}
 
 	public void solve() {
-		for(int i = 0; i < content[0].length - 1 && i < content.length; i++) {
+		for(int i = 0, j = 0; j < getWidth() - 1 && i < getHeight(); i++, j++) {
 			int m = -1, n = -1;
 
-			for(int pn = i; pn < content[0].length; pn++) {
+
+
+			for(; j < getWidth(); j++) {
 				for(int pm = i; pm < content.length; pm++) {
-					if(content[pm][pn] != 0) {
+					if(content[pm][j].value() != 0) {
 						m = pm;
-						n = pn;
+						n = j;
 						break;
 					}
 				}
@@ -54,39 +67,48 @@ public class Matrix {
 			}
 
 
-			multiply(m, 1 / content[m][n]);
-
-			content[m][n] = 1; // avoid rounding errors
+			multiply(m, content[m][n].invert());
 
 			for(int row = 0; row < content.length; row++) {
 				if(row != m) {
-					add(m, row, -content[row][n]);
-					content[row][n] = 0; // avoid rounding errors
+					add(m, row, content[row][n].multiply(-1));
 				}
 			}
 		}
 	}
 
 	private void swap(int m1, int m2) {
-		double[] tmp = content[m1];
+		Fraction[] tmp = content[m1];
 		content[m1] = content[m2];
 		content[m2] = tmp;
 	}
 
-	private void multiply(int m, double mod) {
+	private void multiply(int m, Fraction mod) {
 		for(int n = 0; n < content[m].length; n++) {
-			double val = content[m][n] * mod;
-			if(val == -0) val = 0;
-			content[m][n] = val;
+			content[m][n] = content[m][n].multiply(mod);
 		}
 	}
 
-	private void add(int m1, int m2, double mod) {
+	private void add(int m1, int m2, Fraction mod) {
 		for(int n = 0; n < content[m1].length; n++) {
-			double val = content[m2][n] + content[m1][n] * mod;
-			if(val == -0) val = 0;
-			content[m2][n] = val;
+			content[m2][n] = content[m2][n].add(content[m1][n].multiply(mod));
 		}
+	}
+
+	public boolean valid() {
+		for(int i = 0; i < getHeight(); i++) {
+			boolean zero = true;
+			for(int j = 0; j < getWidth() - 1; j++) {
+				if(content[i][j].value() != 0) {
+					zero = false;
+					break;
+				}
+			}
+			if(zero && content[i][getWidth() - 1].value() != 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public Polynomial createPolynomial() {
@@ -114,34 +136,19 @@ public class Matrix {
 
 		int i = 0, j = 0;
 		while(i < getHeight() && j < getWidth()) {
-			if(content[i][j] != 1) {
+			if(content[i][j].value() != 1) {
 				j++;
 				continue;
 			}
 			double value = 0;
 			if(i < vars) {
-				value = content[i][getWidth() - 1];
+				value = content[i][getWidth() - 1].value();
 			}
 
 			polynomial.setCoefficient(exponents[j][0], exponents[j][1], value);
 			i++;
 			j++;
 		}
-
-		/*for(int i = 0, grade = 0; i < vars; grade++) {
-			for(int y = 0; y <= grade; y++) {
-				int x = grade - y;
-
-				double value = 0;
-				if(i < vars) {
-					value = content[i][getWidth() - 1];
-				}
-
-				polynomial.setCoefficient(x, y, value);
-
-				i++;
-			}
-		}*/
 
 		return polynomial;
 	}
@@ -150,11 +157,11 @@ public class Matrix {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 
-		for (double[] doubles : content) {
+		for (Fraction[] fractions : content) {
 			s.append("[");
-			for (int n = 0; n < doubles.length; n++) {
-				s.append(doubles[n]);
-				if (n < doubles.length - 1) s.append(", ");
+			for (int n = 0; n < fractions.length; n++) {
+				s.append(fractions[n]);
+				if (n < fractions.length - 1) s.append(", ");
 			}
 			s.append("]\n");
 		}

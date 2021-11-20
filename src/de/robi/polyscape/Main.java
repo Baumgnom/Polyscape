@@ -3,7 +3,7 @@ package de.robi.polyscape;
 import de.robi.polyscape.frame.Frame;
 import de.robi.polyscape.frame.Gradient;
 import de.robi.polyscape.scape.Constraint;
-import de.robi.polyscape.scape.Matrix;
+import de.robi.polyscape.math.Matrix;
 import de.robi.polyscape.scape.Polynomial;
 
 import java.awt.*;
@@ -14,10 +14,23 @@ public class Main {
 
 	public static void main(String[] args) {
 
-
-		/**/
-
 		Random random = new Random();
+
+		/*Matrix matrix = new Matrix(10, 13);
+		for(int i = 0; i < matrix.getHeight(); i++) {
+			for(int j = 0; j < matrix.getWidth(); j++) {
+				matrix.set(i, j, random.nextInt(5) - 2);
+			}
+		}
+
+		System.out.println(matrix);
+
+		matrix.solve();*/
+
+
+
+
+
 
 
 		Frame frame = new Frame();
@@ -38,15 +51,23 @@ public class Main {
 			Constraint constraint = new Constraint();
 
 
-			for(int i = 0; i < 3; i++) {
-				for(int j = 0; j < 3; j++) {
+			for(int i = 0; i < 5; i++) {
+				for(int j = 0; j < 5; j++) {
 					constraint.addConstraint(i, j, random.nextInt(5));
 				}
 			}
 
-			Matrix matrix = constraint.createMatrix(5);
-			System.out.println(matrix);
-			matrix.solve();
+
+			Matrix matrix = null;
+			for(int grade = 10; ; grade++) {
+				matrix = constraint.createMatrix(grade);
+				matrix.solve();
+				System.out.println(matrix);
+
+				if(matrix.valid()) {
+					break;
+				}
+			}
 
 			Polynomial polynomial = matrix.createPolynomial();
 
@@ -59,13 +80,9 @@ public class Main {
 			frame.setPolynomial(polynomial);
 
 			System.out.println(matrix);
-			System.out.println(polynomial);
+			//System.out.println(polynomial);
 
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			return;
 		}
 	}
 }

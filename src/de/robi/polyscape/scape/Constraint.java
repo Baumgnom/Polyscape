@@ -1,5 +1,7 @@
 package de.robi.polyscape.scape;
 
+import de.robi.polyscape.math.Matrix;
+
 import java.util.HashMap;
 import java.util.Map;
 
